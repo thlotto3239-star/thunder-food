@@ -1,4 +1,5 @@
-'use client'
+"use client";
+
 import RiderStubLayout from '@/app/rider/RiderStubLayout'
 
 const faqs = [

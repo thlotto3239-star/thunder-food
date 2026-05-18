@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getRestaurantHistoryOrders } from "@/app/actions/order"
 
 const statusMap: Record<string, string> = {

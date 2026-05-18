@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getAvailableDeliveries, getMyDeliveries } from '@/app/actions/order'
 import { getRiderProfile } from '@/app/actions/rider'
 import RiderJobCard from './RiderJobCard'

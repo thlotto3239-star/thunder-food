@@ -5,23 +5,23 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
 export async function login(formData: FormData) {
-  const username = formData.get('username') as string
-  const pin = formData.get('pin') as string
+  const phone = formData.get('phone') as string
+  const password = formData.get('password') as string
 
-  if (!username || !pin) {
-    return { error: 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน' }
+  if (!phone || !password) {
+    return { error: 'กรุณากรอกเบอร์โทรศัพท์และรหัสผ่าน' }
   }
 
   const supabase = await createClient()
-  const email = `${username.toLowerCase()}@thunder-food.com`
+  const email = `${phone.toLowerCase()}@thunder-food.com`
 
   const { data, error } = await supabase.auth.signInWithPassword({
     email,
-    password: pin,
+    password: password,
   })
 
   if (error) {
-    return { error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' }
+    return { error: 'เบอร์โทรศัพท์หรือรหัสผ่านไม่ถูกต้อง' }
   }
 
   // Determine redirect based on role securely from the database
@@ -41,24 +41,24 @@ export async function login(formData: FormData) {
 
 export async function register(formData: FormData) {
   const fullName = formData.get('fullName') as string
-  const username = formData.get('username') as string
-  const pin = formData.get('pin') as string
+  const phone = formData.get('phone') as string
+  const password = formData.get('password') as string
   const role = formData.get('role') as 'customer' | 'restaurant' | 'rider'
 
-  if (!fullName || !username || !pin || !role) {
+  if (!fullName || !phone || !password || !role) {
     return { error: 'กรุณากรอกข้อมูลให้ครบถ้วน' }
   }
 
-  if (pin.length < 6) {
+  if (password.length < 6) {
     return { error: 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร' }
   }
 
   const supabase = await createClient()
-  const email = `${username.toLowerCase()}@thunder-food.com`
+  const email = `${phone.toLowerCase()}@thunder-food.com`
 
   const { data, error } = await supabase.auth.signUp({
     email,
-    password: pin,
+    password: password,
     options: {
       data: {
         full_name: fullName,
@@ -69,7 +69,7 @@ export async function register(formData: FormData) {
 
   if (error) {
     if (error.message.includes('already registered')) {
-      return { error: 'ชื่อผู้ใช้นี้มีในระบบแล้ว' }
+      return { error: 'เบอร์โทรศัพท์นี้ถูกใช้งานในระบบแล้ว' }
     }
     if (error.status === 429) {
       return { error: 'ระบบส่งอีเมลจำกัดจำนวนครั้ง โปรดแจ้ง Admin ให้ปิด Confirm Email ในหน้า Supabase Dashboard' }
@@ -80,7 +80,7 @@ export async function register(formData: FormData) {
   // Immediately sign in to set cookies and create session
   const { error: signInError } = await supabase.auth.signInWithPassword({
     email,
-    password: pin,
+    password: password,
   })
 
   if (signInError) {
@@ -94,7 +94,7 @@ export async function register(formData: FormData) {
       id: data.user.id,
       role: role,
       full_name: fullName,
-      phone: username,
+      phone: phone,
       updated_at: new Date().toISOString()
     })
 

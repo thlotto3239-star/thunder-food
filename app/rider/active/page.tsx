@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getMyDeliveries } from "@/app/actions/order"
 import ActiveDeliveryClient from "./ActiveDeliveryClient"
 

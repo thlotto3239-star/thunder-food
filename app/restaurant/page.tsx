@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getRestaurantOrders } from '@/app/actions/order'
 import OrderCard from './OrderCard'
 import RealtimeListener from './RealtimeListener'

@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { AddressSelector } from "@/components/thunder/address-selector"
 import { BottomNav } from "@/components/thunder/bottom-nav"
 import { CartSheet, FloatingCartButton } from "@/components/thunder/cart-sheet"

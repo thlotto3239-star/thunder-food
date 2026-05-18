@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 // Server Component
 
 import { ThunderLogo } from "@/components/thunder/logo";
@@ -138,8 +140,22 @@ export default async function HomePage() {
     <div className="min-h-screen bg-background pb-36">
       {/* Header */}
       <header className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border">
-        <div className="max-w-md mx-auto px-4 py-3">
+        <div className="max-w-md mx-auto px-4 py-3.5 space-y-3">
+          {/* Top Brand Logo Bar */}
           <div className="flex items-center justify-between">
+            <Link href="/design" className="hover:opacity-90 transition-opacity">
+              <ThunderLogo size="sm" />
+            </Link>
+            <div className="flex items-center gap-2">
+              <Link href="/design" className="text-[10px] font-bold text-primary px-3 py-1 bg-primary/10 border border-primary/20 rounded-full hover:bg-primary/25 transition-all flex items-center gap-1">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+                โหมดออกแบบแบรนด์
+              </Link>
+            </div>
+          </div>
+          
+          {/* Bottom Location/Actions Bar */}
+          <div className="flex items-center justify-between pt-1">
             <AddressSelector />
             <div className="flex items-center gap-2">
               <button className="relative w-10 h-10 rounded-full bg-muted flex items-center justify-center hover:bg-muted/80 transition-colors">

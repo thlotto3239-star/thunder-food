@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getRiderProfile } from "@/app/actions/rider"
 import RiderProfileClient from "./RiderProfileClient"
 import Link from "next/link"

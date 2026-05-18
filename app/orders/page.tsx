@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { BottomNav } from "@/components/thunder/bottom-nav";
 import { ArrowLeft } from "lucide-react";

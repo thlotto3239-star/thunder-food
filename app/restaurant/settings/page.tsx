@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getRestaurantProfile } from '@/app/actions/restaurant'
 import RestaurantSettingsForm from './RestaurantSettingsForm'
 

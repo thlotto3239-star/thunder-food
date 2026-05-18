@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getUserAddresses, getPaymentMethods } from "@/app/actions/customer"
 import CheckoutClient from "./CheckoutClient"
 

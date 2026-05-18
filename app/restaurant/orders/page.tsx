@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getRestaurantOrders } from "@/app/actions/order"
 import RestaurantOrdersClient from "./RestaurantOrdersClient"
 

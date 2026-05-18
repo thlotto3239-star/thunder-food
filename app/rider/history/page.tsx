@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getRiderHistory } from "@/app/actions/rider"
 import { MapPin, CheckCircle, XCircle } from "lucide-react"
 

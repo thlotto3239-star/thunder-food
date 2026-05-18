@@ -27,6 +27,7 @@ async function seed() {
         data: {
           full_name: acc.name,
           role: acc.role,
+          phone: acc.phone
         }
       }
     });

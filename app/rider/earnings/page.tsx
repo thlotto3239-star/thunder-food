@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getMyEarnings } from "@/app/actions/order"
 import RiderEarningsClient from "./RiderEarningsClient"
 

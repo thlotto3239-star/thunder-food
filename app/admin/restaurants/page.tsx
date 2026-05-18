@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { getUnverifiedRestaurants } from '@/app/actions/admin'
 import AdminRestaurantsClient from './AdminRestaurantsClient'
 
