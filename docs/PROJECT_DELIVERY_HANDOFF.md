@@ -44,7 +44,16 @@ All 4 essential role-testing accounts exist and are mapped perfectly in the data
 
 ---
 
-## 3. 🎨 BRAND LOGO ASSET & DYNAMIC SVG SYSTEM
+## 3. 🛡️ DYNAMIC SERVER-DRIVEN AUTH REDIRECTION (RBAC)
+
+In elite commercial delivery applications, users are never asked to select their "role" during login if they have already registered. The **Thunder Food** platform features an automated, server-driven Role-Based Access Control (RBAC) redirection mechanism:
+*   **Single-Step Login:** Users only input their **Phone Number (10-digit)** and **Password**.
+*   **Automatic Identity Lookup:** The Server Action (`login`) queries the secure PostgreSQL database `public.users` table dynamically, retrieves the user's authentic `role` based on their profile, and returns it.
+*   **Smooth Client-Side Redirection:** The frontend smoothly routes the user to their designated dashboard (`/customer` for customers, `/restaurant` for restaurant owners, `/rider` for delivery riders, and `/admin` for system admins) with zero manual inputs, eliminating login confusion and access conflict errors.
+
+---
+
+## 4. 🎨 BRAND LOGO ASSET & DYNAMIC SVG SYSTEM
 
 The visual identity of **Thunder Food** is highly polished and dynamic:
 
