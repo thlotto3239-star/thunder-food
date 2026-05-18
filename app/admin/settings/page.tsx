@@ -20,7 +20,9 @@ import {
   FileText,
   DollarSign,
   TrendingUp,
-  Loader2
+  Loader2,
+  Key,
+  ShieldCheck
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -71,10 +73,71 @@ export default function AdminSettingsCMS() {
   const [maxDistance, setMaxDistance] = useState("10");
   const [riderCommission, setRiderCommission] = useState("10");
 
+  // Integration API Keys State
+  const [googleMapsKey, setGoogleMapsKey] = useState("");
+  const [slipOkKey, setSlipOkKey] = useState("");
+  const [slipOkBranchId, setSlipOkBranchId] = useState("");
+  const [stripePublicKey, setStripePublicKey] = useState("");
+
+  const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
+  const [isSavingConfigs, setIsSavingConfigs] = useState(false);
+
+  const toggleKeyVisibility = (key: string) => {
+    setShowKeys(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
   useEffect(() => {
     fetchBanners();
     fetchCategories();
+    fetchPlatformSettings();
   }, []);
+
+  async function fetchPlatformSettings() {
+    try {
+      const { data, error } = await supabase
+        .from("system_configs")
+        .select("*");
+      if (error) throw error;
+      if (data) {
+        data.forEach((config) => {
+          const val = config.value;
+          if (val === null || val === undefined) return;
+          const valStr = typeof val === 'object' ? JSON.stringify(val) : String(val);
+          // Strip quotes if they were stored as json strings
+          const cleanVal = valStr.replace(/^"|"$/g, '');
+          
+          switch (config.key) {
+            case "platform_name":
+              setPlatformName(cleanVal || "Thunder Food");
+              break;
+            case "delivery_fee":
+              setDeliveryFee(cleanVal || "25");
+              break;
+            case "max_distance":
+              setMaxDistance(cleanVal || "10");
+              break;
+            case "rider_commission":
+              setRiderCommission(cleanVal || "10");
+              break;
+            case "google_maps_api_key":
+              setGoogleMapsKey(cleanVal || "");
+              break;
+            case "slip_ok_api_key":
+              setSlipOkKey(cleanVal || "");
+              break;
+            case "slip_ok_branch_id":
+              setSlipOkBranchId(cleanVal || "");
+              break;
+            case "stripe_public_key":
+              setStripePublicKey(cleanVal || "");
+              break;
+          }
+        });
+      }
+    } catch (err: any) {
+      console.error("Fetch system configs error:", err.message);
+    }
+  }
 
   async function fetchCategories() {
     try {
@@ -307,11 +370,48 @@ export default function AdminSettingsCMS() {
     }
   }
 
-  function handleSavePlatformSettings() {
-    toast({
-      title: "บันทึกการตั้งค่าแพลตฟอร์มสำเร็จ!",
-      description: "ข้อมูลระบบส่วนกลางได้รับการบันทึกเรียบร้อย",
-    });
+  async function handleSavePlatformSettings() {
+    setIsSavingConfigs(true);
+    try {
+      const configs = [
+        { key: "platform_name", value: platformName, desc: "ชื่อแอปพลิเคชัน" },
+        { key: "delivery_fee", value: deliveryFee, desc: "ค่าจัดส่งเริ่มต้น (บาท)" },
+        { key: "max_distance", value: maxDistance, desc: "รัศมีรับส่งสูงสุด (กิโลเมตร)" },
+        { key: "rider_commission", value: riderCommission, desc: "ค่าส่วนแบ่งแพลตฟอร์ม GP (%)" },
+        { key: "google_maps_api_key", value: googleMapsKey, desc: "Google Maps API Key" },
+        { key: "slip_ok_api_key", value: slipOkKey, desc: "SlipOK API Key สำหรับตรวจสลิป" },
+        { key: "slip_ok_branch_id", value: slipOkBranchId, desc: "SlipOK Branch ID" },
+        { key: "stripe_public_key", value: stripePublicKey, desc: "Stripe Publishable API Key" }
+      ];
+
+      for (const config of configs) {
+        const { error } = await supabase
+          .from("system_configs")
+          .upsert(
+            { 
+              key: config.key, 
+              value: config.value,
+              description: config.desc,
+              updated_at: new Date().toISOString() 
+            },
+            { onConflict: "key" }
+          );
+        if (error) throw error;
+      }
+
+      toast({
+        title: "บันทึกการตั้งค่าแพลตฟอร์มสำเร็จ!",
+        description: "ข้อมูลระบบและการตั้งค่า API Keys ทั้งหมดได้รับการบันทึกลงฐานข้อมูลเรียบร้อยแล้ว",
+      });
+    } catch (err: any) {
+      toast({
+        variant: "destructive",
+        title: "เกิดข้อผิดพลาดในการบันทึก",
+        description: err.message,
+      });
+    } finally {
+      setIsSavingConfigs(false);
+    }
   }
 
   return (
@@ -648,7 +748,7 @@ export default function AdminSettingsCMS() {
 
       {/* Tab: PLATFORM CONFIG */}
       {activeTab === "platform" && (
-        <div className="max-w-2xl font-thai space-y-6">
+        <div className="max-w-2xl font-thai space-y-6 animate-in fade-in">
           <Card className="rounded-[1.5rem] border-0 shadow-sm bg-white overflow-hidden">
             <CardHeader className="bg-gray-50 border-b border-gray-100 p-6">
               <CardTitle className="text-lg font-black flex items-center gap-2 text-gray-900">
@@ -704,12 +804,113 @@ export default function AdminSettingsCMS() {
                   </div>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* New Premium Integration API Keys Card */}
+          <Card className="rounded-[1.5rem] border-0 shadow-sm bg-white overflow-hidden">
+            <CardHeader className="bg-gray-50 border-b border-gray-100 p-6">
+              <CardTitle className="text-lg font-black flex items-center gap-2 text-gray-900">
+                <Key className="text-[#ffd709]" size={20} />
+                การเชื่อมต่อ API ภายนอก (Integration API Keys)
+              </CardTitle>
+              <CardDescription className="text-xs">ระบุ API Keys เพื่อเปิดระบบนำทางแผนที่, ตรวจสลิปอัตโนมัติ และตัดบัตรเครดิต</CardDescription>
+            </CardHeader>
+            <CardContent className="p-6 space-y-4">
+              {/* Google Maps API Key */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-bold text-gray-700">Google Maps API Key (ระบบจัดเส้นทางไรเดอร์)</label>
+                  <button 
+                    type="button" 
+                    onClick={() => toggleKeyVisibility("google")}
+                    className="text-[10px] text-gray-500 flex items-center gap-1 hover:text-gray-900"
+                  >
+                    {showKeys["google"] ? <EyeOff size={12} /> : <Eye size={12} />} 
+                    {showKeys["google"] ? "ซ่อนคีย์" : "แสดงคีย์"}
+                  </button>
+                </div>
+                <Input 
+                  type={showKeys["google"] ? "text" : "password"}
+                  placeholder="AIzaSy..." 
+                  value={googleMapsKey} 
+                  onChange={e => setGoogleMapsKey(e.target.value)}
+                  className="rounded-xl border-gray-200 font-mono text-sm"
+                />
+              </div>
+
+              {/* SlipOK API Integration */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center">
+                    <label className="text-xs font-bold text-gray-700">SlipOK API Key (ตรวจสลิปอัตโนมัติ)</label>
+                    <button 
+                      type="button" 
+                      onClick={() => toggleKeyVisibility("slip")}
+                      className="text-[10px] text-gray-500 flex items-center gap-1 hover:text-gray-900"
+                    >
+                      {showKeys["slip"] ? <EyeOff size={12} /> : <Eye size={12} />} 
+                      {showKeys["slip"] ? "ซ่อน" : "แสดง"}
+                    </button>
+                  </div>
+                  <Input 
+                    type={showKeys["slip"] ? "text" : "password"}
+                    placeholder="SLIPOK-KEY..." 
+                    value={slipOkKey} 
+                    onChange={e => setSlipOkKey(e.target.value)}
+                    className="rounded-xl border-gray-200 font-mono text-sm"
+                  />
+                </div>
+                
+                <div className="space-y-1.5">
+                  <label className="text-xs font-bold text-gray-700">SlipOK Branch ID</label>
+                  <Input 
+                    placeholder="เช่น 1234" 
+                    value={slipOkBranchId} 
+                    onChange={e => setSlipOkBranchId(e.target.value)}
+                    className="rounded-xl border-gray-200 font-mono text-sm"
+                  />
+                </div>
+              </div>
+
+              {/* Stripe Publishable Key */}
+              <div className="space-y-1.5">
+                <div className="flex justify-between items-center">
+                  <label className="text-xs font-bold text-gray-700">Stripe Publishable Key (ระบบชำระเงินบัตรเครดิต)</label>
+                  <button 
+                    type="button" 
+                    onClick={() => toggleKeyVisibility("stripe")}
+                    className="text-[10px] text-gray-500 flex items-center gap-1 hover:text-gray-900"
+                  >
+                    {showKeys["stripe"] ? <EyeOff size={12} /> : <Eye size={12} />} 
+                    {showKeys["stripe"] ? "ซ่อนคีย์" : "แสดงคีย์"}
+                  </button>
+                </div>
+                <Input 
+                  type={showKeys["stripe"] ? "text" : "password"}
+                  placeholder="pk_live_..." 
+                  value={stripePublicKey} 
+                  onChange={e => setStripePublicKey(e.target.value)}
+                  className="rounded-xl border-gray-200 font-mono text-sm"
+                />
+              </div>
 
               <Button
                 onClick={handleSavePlatformSettings}
-                className="w-full bg-[#ffd709] hover:bg-[#ffd709]/90 text-[#1c1c1e] font-black rounded-xl py-6 mt-4"
+                disabled={isSavingConfigs}
+                className="w-full bg-[#ffd709] hover:bg-[#ffd709]/90 text-[#1c1c1e] font-black rounded-xl py-6 mt-4 flex items-center justify-center gap-2"
               >
-                บันทึกการกำหนดค่าด่วน
+                {isSavingConfigs ? (
+                  <>
+                    <Loader2 className="animate-spin" size={18} />
+                    กำลังบันทึกการตั้งค่าระบบ...
+                  </>
+                ) : (
+                  <>
+                    <ShieldCheck size={18} />
+                    บันทึกการตั้งค่าและเปิดใช้งาน API Keys
+                  </>
+                )}
               </Button>
             </CardContent>
           </Card>
