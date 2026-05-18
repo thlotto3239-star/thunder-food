@@ -55,8 +55,8 @@ export default async function RestaurantMenuPage({ params }: { params: Promise<{
     <div className="bg-[#f9f6f5] min-h-screen pb-32 font-sans">
       {/* Header / Cover */}
       <div className="h-64 bg-gray-300 relative">
-        {restaurant.image_url || restaurant.cover_image_url ? (
-          <img src={restaurant.image_url || restaurant.cover_image_url} alt={restaurant.name} className="w-full h-full object-cover" />
+        {restaurant.image_url ? (
+          <img src={restaurant.image_url} alt={restaurant.name} className="w-full h-full object-cover" />
         ) : (
           <div className="w-full h-full bg-gradient-to-r from-amber-200 to-orange-200" />
         )}

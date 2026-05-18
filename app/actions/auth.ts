@@ -24,6 +24,10 @@ export async function login(formData: FormData) {
     return { error: 'เบอร์โทรศัพท์หรือรหัสผ่านไม่ถูกต้อง' }
   }
 
+  if (!data || !data.user) {
+    return { error: 'ไม่พบข้อมูลผู้ใช้งานในระบบ' }
+  }
+
   // Determine redirect based on role securely from the database
   const { data: profile } = await supabase
     .from('users')
@@ -72,6 +76,10 @@ export async function register(formData: FormData) {
       return { error: 'ระบบส่งอีเมลจำกัดจำนวนครั้ง โปรดแจ้ง Admin ให้ปิด Confirm Email ในหน้า Supabase Dashboard' }
     }
     return { error: error.message }
+  }
+
+  if (!data || !data.user) {
+    return { error: 'ไม่สามารถลงทะเบียนบัญชีผู้ใช้งานได้' }
   }
 
   // Immediately sign in to set cookies and create session

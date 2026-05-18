@@ -16,7 +16,7 @@ export default function RiderJobCard({ order, isMyJob }: { order: any, isMyJob: 
     setIsLoading(false)
   }
 
-  async function handleUpdateStatus(status: string) {
+  async function handleUpdateStatus(status: "pending" | "preparing" | "ready" | "picking_up" | "delivering" | "completed" | "cancelled") {
     setIsLoading(true)
     const res = await updateOrderStatus(order.id, status)
     if (res.error) toast({ title: 'Error', description: res.error, variant: 'destructive' })

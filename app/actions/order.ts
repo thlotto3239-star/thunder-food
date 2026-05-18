@@ -220,7 +220,7 @@ export async function getRestaurantHistoryOrders() {
   return { data }
 }
 
-export async function updateOrderStatus(orderId: string, status: string) {
+export async function updateOrderStatus(orderId: string, status: 'pending' | 'preparing' | 'ready' | 'picking_up' | 'delivering' | 'completed' | 'cancelled') {
   const supabase = await createClient()
 
   // Fetch customer_id and restaurant name first to generate a detailed notification

@@ -13,7 +13,7 @@ export default function OrderCard({ order }: { order: any }) {
   const isPending = order.status === 'pending'
   const isTransfer = order.payment_method === 'transfer'
 
-  async function handleStatusUpdate(newStatus: string) {
+  async function handleStatusUpdate(newStatus: "pending" | "preparing" | "ready" | "picking_up" | "delivering" | "completed" | "cancelled") {
     setIsLoading(true)
     const res = await updateOrderStatus(order.id, newStatus)
     if (res.error) {

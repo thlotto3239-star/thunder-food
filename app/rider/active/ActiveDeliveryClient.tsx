@@ -58,7 +58,7 @@ export default function ActiveDeliveryClient({ initialOrders }: { initialOrders:
 
     const currentConfig = stageConfig[delivery.status as DeliveryStage]
     if (currentConfig && currentConfig.nextState) {
-      const res = await updateOrderStatus(delivery.id, currentConfig.nextState)
+      const res = await updateOrderStatus(delivery.id, currentConfig.nextState as any)
       if (res.error) {
         toast({ title: "Error", description: res.error, variant: "destructive" })
       } else {

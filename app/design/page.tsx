@@ -5,6 +5,7 @@ import { ThunderLogo } from "@/components/thunder/logo";
 import { ArrowLeft, Check, Copy, Palette, Type, Shield, Sparkles, Smartphone, Award, Flame } from "lucide-react";
 import Link from "next/link";
 import { useNotification } from "@/components/thunder/notification-popup";
+import { cn } from "@/lib/utils";
 
 interface LogoSpecification {
   id: 1 | 2 | 3;

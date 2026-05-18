@@ -15,10 +15,10 @@ type Category = { id: string; name: string; sort_order: number }
 type MenuItem = { 
   id: string; 
   name: string; 
-  description: string; 
+  description: string | null; 
   price: number; 
-  category_id: string; 
-  image_url: string; 
+  category_id: string | null; 
+  image_url: string | null; 
   is_available: boolean;
   menu_categories?: { name: string } | null;
 }
@@ -243,7 +243,7 @@ export default function MenuManager({
               </div>
               <div>
                 <label className="block text-xs font-bold text-[#5c5b5b] mb-1">คำอธิบาย</label>
-                <textarea name="description" rows={2} defaultValue={editingItem?.description} className="w-full bg-[#f3f0ef] border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#ffd709] resize-none" />
+                <textarea name="description" rows={2} defaultValue={editingItem?.description || ''} className="w-full bg-[#f3f0ef] border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#ffd709] resize-none" />
               </div>
               <div>
                 <label className="block text-xs font-bold text-[#5c5b5b] mb-1">อัปโหลดรูปภาพใหม่ (จะทับ URL เดิม)</label>
@@ -251,7 +251,7 @@ export default function MenuManager({
               </div>
               <div>
                 <label className="block text-xs font-bold text-[#5c5b5b] mb-1">หรือระบุ รูปภาพ (URL)</label>
-                <input name="image_url" defaultValue={editingItem?.image_url} placeholder="https://..." className="w-full bg-[#f3f0ef] border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#ffd709]" />
+                <input name="image_url" defaultValue={editingItem?.image_url || ''} placeholder="https://..." className="w-full bg-[#f3f0ef] border-none rounded-xl py-3 px-4 focus:ring-2 focus:ring-[#ffd709]" />
               </div>
               <div className="flex items-center justify-between bg-[#f3f0ef] p-3 rounded-xl">
                 <span className="font-bold text-sm">พร้อมขาย (Available)</span>

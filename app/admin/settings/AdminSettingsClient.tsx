@@ -35,8 +35,8 @@ interface Banner {
   text_color: string | null;
   image_url: string | null;
   link_url: string | null;
-  is_active: boolean;
-  created_at: string;
+  is_active: boolean | null;
+  created_at: string | null;
 }
 
 export default function AdminSettingsCMS() {
@@ -261,7 +261,7 @@ export default function AdminSettingsCMS() {
   }
 
   // Toggle Banner Active Status
-  async function handleToggleActive(bannerId: string, currentStatus: boolean) {
+  async function handleToggleActive(bannerId: string, currentStatus: boolean | null) {
     try {
       const { error } = await supabase
         .from("banners")
@@ -617,7 +617,7 @@ export default function AdminSettingsCMS() {
                         <div className="flex justify-between">
                           <span className="text-gray-400">วันที่ลงทะเบียน:</span>
                           <span className="font-bold text-gray-900">
-                            {new Date(banner.created_at).toLocaleDateString("th-TH")}
+                            {banner.created_at ? new Date(banner.created_at).toLocaleDateString("th-TH") : "-"}
                           </span>
                         </div>
                       </div>

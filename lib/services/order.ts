@@ -48,7 +48,7 @@ export class OrderService {
     return { data, error };
   }
   
-  static async updateOrderStatus(orderId: string, status: string) {
+  static async updateOrderStatus(orderId: string, status: 'pending' | 'preparing' | 'ready' | 'picking_up' | 'delivering' | 'completed' | 'cancelled') {
     const supabase = createClient();
     const { data, error } = await supabase
       .from('orders')

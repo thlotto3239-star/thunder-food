@@ -46,6 +46,7 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
   const subtotal = orderData.order_items.reduce((sum: number, item: any) => sum + (item.price_at_time * item.quantity), 0)
   const deliveryFee = orderData.delivery_fee || 0
   const total = subtotal + deliveryFee
+  const deliveryAddress = orderData.delivery_address as any
   
   // Format Date
   const placedAt = new Date(orderData.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })
@@ -170,9 +171,9 @@ export default async function OrderDetailPage({ params }: { params: Promise<{ id
               <MapPin className="mt-0.5 h-5 w-5 text-accent" />
               <div>
                 <p className="font-semibold text-foreground">ที่อยู่จัดส่ง</p>
-                <p className="text-sm text-muted-foreground">{orderData.delivery_address?.address || orderData.delivery_address}</p>
-                {orderData.delivery_address?.note && (
-                  <p className="text-sm text-muted-foreground mt-1">หมายเหตุ: {orderData.delivery_address.note}</p>
+                <p className="text-sm text-muted-foreground">{deliveryAddress?.address || (typeof deliveryAddress === 'string' ? deliveryAddress : '')}</p>
+                {deliveryAddress?.note && (
+                  <p className="text-sm text-muted-foreground mt-1">หมายเหตุ: {deliveryAddress.note}</p>
                 )}
               </div>
             </div>

@@ -110,8 +110,8 @@ export default function AdminUsersClient({ initialUsers }: { initialUsers: UserR
       const { error: userError } = await supabase
         .from("users")
         .update({
-          full_name: editName || null,
-          phone: editPhone || null,
+          full_name: editName || undefined,
+          phone: editPhone || undefined,
           role: editRole,
           updated_at: new Date().toISOString(),
         })

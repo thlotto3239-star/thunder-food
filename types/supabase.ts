@@ -14,6 +14,108 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_contents: {
+        Row: {
+          body_html: string
+          content_key: string
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          target_role: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          body_html: string
+          content_key: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          target_role?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          body_html?: string
+          content_key?: string
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          target_role?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      banners: {
+        Row: {
+          bg_color: string | null
+          button_text: string | null
+          created_at: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean | null
+          link_url: string | null
+          subtitle: string | null
+          text_color: string | null
+          title: string
+        }
+        Insert: {
+          bg_color?: string | null
+          button_text?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          link_url?: string | null
+          subtitle?: string | null
+          text_color?: string | null
+          title: string
+        }
+        Update: {
+          bg_color?: string | null
+          button_text?: string | null
+          created_at?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean | null
+          link_url?: string | null
+          subtitle?: string | null
+          text_color?: string | null
+          title?: string
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          color: string
+          created_at: string | null
+          icon: string
+          id: string
+          is_active: boolean | null
+          name: string
+          slug: string
+        }
+        Insert: {
+          color: string
+          created_at?: string | null
+          icon: string
+          id?: string
+          is_active?: boolean | null
+          name: string
+          slug: string
+        }
+        Update: {
+          color?: string
+          created_at?: string | null
+          icon?: string
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
       menu_categories: {
         Row: {
           created_at: string
@@ -100,6 +202,47 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          metadata: Json | null
+          title: string
+          type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          metadata?: Json | null
+          title: string
+          type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          metadata?: Json | null
+          title?: string
+          type?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           id: string
@@ -147,6 +290,7 @@ export type Database = {
           delivery_fee: number
           id: string
           payment_method: Database["public"]["Enums"]["payment_method"]
+          payment_slip_url: string | null
           payment_status: Database["public"]["Enums"]["payment_status"]
           restaurant_id: string
           rider_id: string | null
@@ -161,6 +305,7 @@ export type Database = {
           delivery_fee: number
           id?: string
           payment_method?: Database["public"]["Enums"]["payment_method"]
+          payment_slip_url?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           restaurant_id: string
           rider_id?: string | null
@@ -175,6 +320,7 @@ export type Database = {
           delivery_fee?: number
           id?: string
           payment_method?: Database["public"]["Enums"]["payment_method"]
+          payment_slip_url?: string | null
           payment_status?: Database["public"]["Enums"]["payment_status"]
           restaurant_id?: string
           rider_id?: string | null
@@ -308,6 +454,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      system_configs: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          key: string
+          updated_at: string | null
+          value: Json
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          key: string
+          updated_at?: string | null
+          value: Json
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          key?: string
+          updated_at?: string | null
+          value?: Json
+        }
+        Relationships: []
       }
       user_addresses: {
         Row: {

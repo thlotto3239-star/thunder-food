@@ -19,7 +19,7 @@ const statusConfig: Record<string, { label: string; color: string }> = {
   cancelled: { label: 'ยกเลิก', color: 'bg-red-100 text-red-700 border-red-200' },
 }
 
-function OrderCard({ order, onStatusChange }: { order: any; onStatusChange: (id: string, status: string) => void }) {
+function OrderCard({ order, onStatusChange }: { order: any; onStatusChange: (id: string, status: "pending" | "preparing" | "ready" | "picking_up" | "delivering" | "completed" | "cancelled") => void }) {
   const status = statusConfig[order.status] || statusConfig.pending
   const total = order.total_amount
   const customerName = order.users?.full_name || 'ลูกค้า'
@@ -99,7 +99,7 @@ export default function RestaurantOrdersClient({ initialOrders, error }: { initi
   const [activeTab, setActiveTab] = useState('active')
   const { toast } = useToast()
 
-  const handleStatusChange = async (orderId: string, newStatus: string) => {
+  const handleStatusChange = async (orderId: string, newStatus: "pending" | "preparing" | "ready" | "picking_up" | "delivering" | "completed" | "cancelled") => {
     const res = await updateOrderStatus(orderId, newStatus)
     if (res?.error) {
       toast({ title: 'เกิดข้อผิดพลาด', description: res.error, variant: 'destructive' })

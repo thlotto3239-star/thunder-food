@@ -58,7 +58,15 @@ export default function ProfileNotificationsClient() {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setNotifications(data || []);
+      const mapped: NotificationItem[] = (data || []).map((item) => ({
+        id: item.id,
+        title: item.title || "",
+        body: item.body || "",
+        type: item.type || "info",
+        is_read: !!item.is_read,
+        created_at: item.created_at || new Date().toISOString(),
+      }));
+      setNotifications(mapped);
     } catch (err: any) {
       toast({
         variant: "destructive",
