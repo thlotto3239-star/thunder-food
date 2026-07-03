@@ -105,6 +105,35 @@ export async function getAllOrders() {
   return { data }
 }
 
+export async function getAllRestaurants() {
+  const admin = await isAdmin()
+  if (!admin) return { error: 'Unauthorized' }
+
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('restaurants')
+    .select('*, users!owner_id(full_name, phone)')
+    .order('created_at', { ascending: false })
+
+  if (error) return { error: error.message }
+  return { data }
+}
+
+export async function toggleRestaurantOpenStatus(restaurantId: string, isOpen: boolean) {
+  const admin = await isAdmin()
+  if (!admin) return { error: 'Unauthorized' }
+
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('restaurants')
+    .update({ is_open: isOpen })
+    .eq('id', restaurantId)
+
+  if (error) return { error: error.message }
+  revalidatePath('/admin/restaurants')
+  return { success: true }
+}
+
 export async function updateRestaurantVerification(restaurantId: string, isVerified: boolean) {
   const admin = await isAdmin()
   if (!admin) return { error: 'Unauthorized' }

@@ -26,6 +26,7 @@ import { Separator } from "@/components/ui/separator"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useCart } from "@/components/thunder/cart-context"
 import { createOrder } from "@/app/actions/order"
+import { validateCoupon } from "@/app/actions/coupons"
 import { useNotification } from "@/components/thunder/notification-popup"
 import { createClient } from "@/utils/supabase/client"
 import Link from "next/link"
@@ -47,6 +48,9 @@ export default function CheckoutClient({ addresses, payments }: { addresses: any
   const [selectedPayment, setSelectedPayment] = useState(defaultPayment)
   
   const [promoCode, setPromoCode] = useState("")
+  const [appliedCoupon, setAppliedCoupon] = useState<{ couponId: string; code: string; discount: number } | null>(null)
+  const [couponError, setCouponError] = useState("")
+  const [isCheckingCoupon, setIsCheckingCoupon] = useState(false)
   const [note, setNote] = useState("")
   const [isProcessing, setIsProcessing] = useState(false)
 
@@ -74,8 +78,23 @@ export default function CheckoutClient({ addresses, payments }: { addresses: any
   }, 0)
 
   const deliveryFee = 25
-  const discount = promoCode === "UGLYOS50" ? 50 : 0
+  const discount = appliedCoupon?.discount || 0
   const total = subtotal + deliveryFee - discount
+
+  const handleApplyCoupon = async () => {
+    if (!promoCode.trim()) return
+    setIsCheckingCoupon(true)
+    setCouponError("")
+    const result = await validateCoupon(promoCode, subtotal + deliveryFee)
+    if (result.error) {
+      setCouponError(result.error)
+      setAppliedCoupon(null)
+    } else if (result.success) {
+      setAppliedCoupon({ couponId: result.couponId!, code: result.code!, discount: result.discount! })
+      setCouponError("")
+    }
+    setIsCheckingCoupon(false)
+  }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -224,7 +243,8 @@ export default function CheckoutClient({ addresses, payments }: { addresses: any
         payment_method: selectedPayment,
         item_customizations: itemCustomizations // Store raw structured JSON for future scaling
       },
-      paymentSlipUrl
+      paymentSlipUrl,
+      appliedCoupon ? { couponId: appliedCoupon.couponId, discount: appliedCoupon.discount } : undefined
     )
 
     if (result.error) {
@@ -509,15 +529,33 @@ export default function CheckoutClient({ addresses, payments }: { addresses: any
                 id="promo"
                 placeholder="ใส่รหัสเพื่อลดราคาทันที"
                 value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
+                onChange={(e) => {
+                  setPromoCode(e.target.value.toUpperCase())
+                  setAppliedCoupon(null)
+                  setCouponError("")
+                }}
                 className="rounded-xl border-gray-200"
               />
-              <Button variant="outline" className="rounded-xl px-5 border-[#ffd709] text-yellow-600 hover:bg-yellow-50 font-bold">ใช้รหัส</Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleApplyCoupon}
+                disabled={isCheckingCoupon || !promoCode.trim()}
+                className="rounded-xl px-5 border-[#ffd709] text-yellow-600 hover:bg-yellow-50 font-bold disabled:opacity-50"
+              >
+                {isCheckingCoupon ? "กำลังตรวจสอบ..." : "ใช้รหัส"}
+              </Button>
             </div>
-            {promoCode === "UGLYOS50" && (
+            {appliedCoupon && (
               <p className="mt-2 text-xs font-bold text-green-600 flex items-center gap-1">
                 <span className="material-symbols-outlined text-sm">check_circle</span>
-                ใช้รหัสสำเร็จ! ลด {formatPrice(50)}
+                ใช้รหัส {appliedCoupon.code} สำเร็จ! ลด {formatPrice(appliedCoupon.discount)}
+              </p>
+            )}
+            {couponError && (
+              <p className="mt-2 text-xs font-bold text-red-500 flex items-center gap-1">
+                <span className="material-symbols-outlined text-sm">error</span>
+                {couponError}
               </p>
             )}
           </CardContent>

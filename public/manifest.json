@@ -1,0 +1,27 @@
+{
+  "name": "Thunder Food - สั่งอาหารออนไลน์",
+  "short_name": "Thunder Food",
+  "description": "บริการส่งอาหารที่รวดเร็วที่สุด สั่งอาหารจากร้านดังใกล้บ้านคุณ พร้อมโปรโมชั่นสุดพิเศษ",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFD700",
+  "lang": "th",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/apple-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}

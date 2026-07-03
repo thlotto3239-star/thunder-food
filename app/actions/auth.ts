@@ -45,9 +45,14 @@ export async function register(formData: FormData) {
   const phone = formData.get('phone') as string
   const password = formData.get('password') as string
   const role = formData.get('role') as 'customer' | 'restaurant' | 'rider'
+  const acceptedTerms = formData.get('acceptedTerms') === 'true'
 
   if (!fullName || !phone || !password || !role) {
     return { error: 'กรุณากรอกข้อมูลให้ครบถ้วน' }
+  }
+
+  if (!acceptedTerms) {
+    return { error: 'กรุณายอมรับข้อกำหนดการใช้งานและนโยบายความเป็นส่วนตัวก่อนสมัครสมาชิก' }
   }
 
   if (password.length < 6) {
@@ -100,6 +105,7 @@ export async function register(formData: FormData) {
       role: role,
       full_name: fullName,
       phone: phone,
+      accepted_terms_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     })
 

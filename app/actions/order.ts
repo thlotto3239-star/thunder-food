@@ -35,7 +35,8 @@ export async function createOrder(
   totalAmount: number,
   deliveryFee: number,
   deliveryAddress: any,
-  paymentSlipUrl?: string
+  paymentSlipUrl?: string,
+  coupon?: { couponId: string; discount: number }
 ) {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
@@ -56,11 +57,27 @@ export async function createOrder(
       payment_method: paymentMethod,
       payment_status: 'pending',
       payment_slip_url: paymentSlipUrl,
+      coupon_id: coupon?.couponId ?? null,
+      discount_amount: coupon?.discount ?? 0,
     })
     .select('id')
     .single()
 
   if (orderError) return { error: orderError.message }
+
+  if (coupon?.couponId) {
+    const { data: couponRow } = await supabase
+      .from('coupons')
+      .select('used_count')
+      .eq('id', coupon.couponId)
+      .single()
+    if (couponRow) {
+      await supabase
+        .from('coupons')
+        .update({ used_count: couponRow.used_count + 1 })
+        .eq('id', coupon.couponId)
+    }
+  }
 
   // B-07 Fixed: Include price_at_time (NOT NULL in schema)
   const orderItemsData = items.map((item) => ({

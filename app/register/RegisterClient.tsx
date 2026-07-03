@@ -10,15 +10,28 @@ import { ThunderLogo } from '@/components/thunder/logo'
 export default function RegisterClient() {
   const [isLoading, setIsLoading] = useState(false)
   const [role, setRole] = useState('customer')
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
   const router = useRouter()
   const { showNotification } = useNotification()
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
+
+    if (!acceptedTerms) {
+      showNotification({
+        type: 'error',
+        title: 'กรุณายอมรับข้อกำหนด ⚡',
+        message: 'โปรดยอมรับข้อกำหนดการใช้งานและนโยบายความเป็นส่วนตัวก่อนสมัครสมาชิก',
+        duration: 4000,
+      })
+      return
+    }
+
     setIsLoading(true)
 
     const formData = new FormData(e.currentTarget)
     formData.append('role', role)
+    formData.append('acceptedTerms', 'true')
 
     const result = await register(formData)
 
@@ -194,10 +207,26 @@ export default function RegisterClient() {
                 </div>
               </div>
 
+              <div className="flex items-start gap-3 px-1">
+                <input
+                  type="checkbox"
+                  id="acceptedTerms"
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                  className="mt-1 w-4 h-4 accent-[#ffd709] shrink-0"
+                />
+                <label htmlFor="acceptedTerms" className="text-sm text-[#5c5b5b] leading-relaxed">
+                  ฉันยอมรับ{' '}
+                  <Link href="/terms" target="_blank" className="font-bold text-[#6c5a00] hover:underline">
+                    ข้อกำหนดการใช้งานและนโยบายความเป็นส่วนตัว (PDPA)
+                  </Link>
+                </label>
+              </div>
+
               <div className="pt-4 space-y-4">
-                <button 
-                  type="submit" 
-                  disabled={isLoading}
+                <button
+                  type="submit"
+                  disabled={isLoading || !acceptedTerms}
                   className="w-full bg-[#ffd709] hover:bg-[#5e4e00] hover:text-[#fff2cd] text-[#453900] font-bold py-5 rounded-2xl shadow-[0_12px_24px_-8px_rgba(255,215,9,0.3)] transition-all active:scale-[0.98] flex items-center justify-center gap-2 group disabled:opacity-50"
                 >
                   <span>{isLoading ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก'}</span>

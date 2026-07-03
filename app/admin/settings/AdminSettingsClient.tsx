@@ -22,9 +22,23 @@ import {
   TrendingUp,
   Loader2,
   Key,
-  ShieldCheck
+  ShieldCheck,
+  Tag
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+interface Coupon {
+  id: string;
+  code: string;
+  discount_type: "percent" | "fixed";
+  discount_value: number;
+  min_order_amount: number;
+  max_uses: number | null;
+  used_count: number;
+  is_active: boolean;
+  expires_at: string | null;
+  created_at: string;
+}
 
 interface Banner {
   id: string;
@@ -40,7 +54,7 @@ interface Banner {
 }
 
 export default function AdminSettingsCMS() {
-  const [activeTab, setActiveTab] = useState<"banners" | "categories" | "platform">("banners");
+  const [activeTab, setActiveTab] = useState<"banners" | "categories" | "platform" | "coupons">("banners");
   const [banners, setBanners] = useState<Banner[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -82,6 +96,15 @@ export default function AdminSettingsCMS() {
   const [showKeys, setShowKeys] = useState<Record<string, boolean>>({});
   const [isSavingConfigs, setIsSavingConfigs] = useState(false);
 
+  // Coupons State
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponType, setCouponType] = useState<"percent" | "fixed">("percent");
+  const [couponValue, setCouponValue] = useState("10");
+  const [couponMinOrder, setCouponMinOrder] = useState("0");
+  const [couponMaxUses, setCouponMaxUses] = useState("");
+  const [couponExpiresAt, setCouponExpiresAt] = useState("");
+
   const toggleKeyVisibility = (key: string) => {
     setShowKeys(prev => ({ ...prev, [key]: !prev[key] }));
   };
@@ -90,7 +113,77 @@ export default function AdminSettingsCMS() {
     fetchBanners();
     fetchCategories();
     fetchPlatformSettings();
+    fetchCoupons();
   }, []);
+
+  async function fetchCoupons() {
+    try {
+      const { data, error } = await supabase
+        .from("coupons")
+        .select("*")
+        .order("created_at", { ascending: false });
+      if (error) throw error;
+      setCoupons(data || []);
+    } catch (err: any) {
+      console.error("Fetch coupons error:", err.message);
+    }
+  }
+
+  async function handleCreateCoupon(e: React.FormEvent) {
+    e.preventDefault();
+    if (!couponCode.trim()) {
+      toast({ variant: "destructive", title: "กรุณากรอกรหัสส่วนลด" });
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from("coupons").insert([
+        {
+          code: couponCode.trim().toUpperCase(),
+          discount_type: couponType,
+          discount_value: Number(couponValue),
+          min_order_amount: Number(couponMinOrder) || 0,
+          max_uses: couponMaxUses ? Number(couponMaxUses) : null,
+          expires_at: couponExpiresAt ? new Date(couponExpiresAt).toISOString() : null,
+          is_active: true,
+        },
+      ]);
+      if (error) throw error;
+
+      toast({ title: "สร้างรหัสส่วนลดสำเร็จ!", description: `รหัส ${couponCode.toUpperCase()} พร้อมใช้งานทันที` });
+      setCouponCode("");
+      setCouponValue("10");
+      setCouponMinOrder("0");
+      setCouponMaxUses("");
+      setCouponExpiresAt("");
+      fetchCoupons();
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "เกิดข้อผิดพลาดในการสร้างรหัสส่วนลด", description: err.message });
+    }
+  }
+
+  async function handleToggleCoupon(couponId: string, currentStatus: boolean) {
+    try {
+      const { error } = await supabase.from("coupons").update({ is_active: !currentStatus }).eq("id", couponId);
+      if (error) throw error;
+      toast({ title: `${!currentStatus ? "เปิด" : "ปิด"}ใช้งานรหัสส่วนลดแล้ว` });
+      fetchCoupons();
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "ไม่สามารถอัปเดตสถานะได้", description: err.message });
+    }
+  }
+
+  async function handleDeleteCoupon(couponId: string) {
+    if (!confirm("คุณแน่ใจหรือไม่ที่จะลบรหัสส่วนลดนี้ถาวร?")) return;
+    try {
+      const { error } = await supabase.from("coupons").delete().eq("id", couponId);
+      if (error) throw error;
+      toast({ title: "ลบรหัสส่วนลดสำเร็จ!" });
+      fetchCoupons();
+    } catch (err: any) {
+      toast({ variant: "destructive", title: "เกิดข้อผิดพลาดในการลบ", description: err.message });
+    }
+  }
 
   async function fetchPlatformSettings() {
     try {
@@ -450,6 +543,15 @@ export default function AdminSettingsCMS() {
             )}
           >
             <Settings size={16} /> Platform Config
+          </button>
+          <button
+            onClick={() => setActiveTab("coupons")}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all",
+              activeTab === "coupons" ? "bg-[#ffd709] text-[#1c1c1e] shadow-sm" : "text-gray-600 hover:text-gray-900"
+            )}
+          >
+            <Tag size={16} /> Coupons
           </button>
         </div>
       </div>
@@ -935,6 +1037,165 @@ export default function AdminSettingsCMS() {
               </div>
             </div>
           </Card>
+        </div>
+      )}
+
+      {/* Tab: COUPONS CMS */}
+      {activeTab === "coupons" && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 font-thai">
+          {/* Creation Form */}
+          <div className="lg:col-span-1">
+            <Card className="rounded-[1.5rem] border-0 shadow-sm bg-white overflow-hidden sticky top-8">
+              <CardHeader className="bg-gray-50 border-b border-gray-100 p-6">
+                <CardTitle className="text-lg font-black flex items-center gap-2 text-gray-900">
+                  <Tag className="text-amber-500" size={20} />
+                  สร้างรหัสส่วนลดใหม่
+                </CardTitle>
+                <CardDescription className="text-xs">รหัสจะพร้อมใช้งานทันทีที่หน้าชำระเงินของลูกค้า</CardDescription>
+              </CardHeader>
+              <CardContent className="p-6">
+                <form onSubmit={handleCreateCoupon} className="space-y-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-700">รหัสส่วนลด *</label>
+                    <Input
+                      placeholder="เช่น NEW50"
+                      value={couponCode}
+                      onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                      className="rounded-xl border-gray-200 font-mono"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-gray-700">ประเภทส่วนลด</label>
+                      <select
+                        value={couponType}
+                        onChange={e => setCouponType(e.target.value as "percent" | "fixed")}
+                        className="w-full h-10 border border-gray-200 rounded-xl px-3 text-sm focus:outline-none bg-white"
+                      >
+                        <option value="percent">เปอร์เซ็นต์ (%)</option>
+                        <option value="fixed">จำนวนเงิน (บาท)</option>
+                      </select>
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-gray-700">มูลค่าส่วนลด *</label>
+                      <Input
+                        type="number"
+                        value={couponValue}
+                        onChange={e => setCouponValue(e.target.value)}
+                        className="rounded-xl border-gray-200"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-gray-700">ยอดสั่งซื้อขั้นต่ำ (บาท)</label>
+                      <Input
+                        type="number"
+                        value={couponMinOrder}
+                        onChange={e => setCouponMinOrder(e.target.value)}
+                        className="rounded-xl border-gray-200"
+                      />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-gray-700">จำกัดจำนวนใช้ (ว่าง = ไม่จำกัด)</label>
+                      <Input
+                        type="number"
+                        placeholder="ไม่จำกัด"
+                        value={couponMaxUses}
+                        onChange={e => setCouponMaxUses(e.target.value)}
+                        className="rounded-xl border-gray-200"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-gray-700">วันหมดอายุ (ว่าง = ไม่หมดอายุ)</label>
+                    <Input
+                      type="date"
+                      value={couponExpiresAt}
+                      onChange={e => setCouponExpiresAt(e.target.value)}
+                      className="rounded-xl border-gray-200"
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full bg-[#ffd709] hover:bg-[#ffd709]/90 text-[#1c1c1e] font-black rounded-xl py-6"
+                  >
+                    <Plus size={16} className="mr-1" /> สร้างรหัสส่วนลด
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Coupons List */}
+          <div className="lg:col-span-2 space-y-6">
+            <h2 className="text-xl font-bold text-gray-900">รหัสส่วนลดทั้งหมด ({coupons.length})</h2>
+
+            {coupons.length === 0 ? (
+              <div className="text-center py-20 bg-white rounded-[1.5rem] border border-gray-100 text-gray-500 text-sm">
+                ยังไม่มีรหัสส่วนลดในระบบ
+              </div>
+            ) : (
+              <div className="bg-white rounded-[1.5rem] shadow-sm border border-gray-100 overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 text-left text-gray-500">
+                    <tr>
+                      <th className="p-4">รหัส</th>
+                      <th className="p-4">ส่วนลด</th>
+                      <th className="p-4">ขั้นต่ำ</th>
+                      <th className="p-4">ใช้ไปแล้ว</th>
+                      <th className="p-4">หมดอายุ</th>
+                      <th className="p-4">สถานะ</th>
+                      <th className="p-4 text-right">จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {coupons.map((c) => (
+                      <tr key={c.id} className="border-t border-gray-100">
+                        <td className="p-4 font-mono font-bold">{c.code}</td>
+                        <td className="p-4">
+                          {c.discount_type === "percent" ? `${c.discount_value}%` : `฿${c.discount_value}`}
+                        </td>
+                        <td className="p-4 text-gray-500">฿{c.min_order_amount}</td>
+                        <td className="p-4 text-gray-500">
+                          {c.used_count}{c.max_uses !== null ? ` / ${c.max_uses}` : ""}
+                        </td>
+                        <td className="p-4 text-gray-500">
+                          {c.expires_at ? new Date(c.expires_at).toLocaleDateString("th-TH") : "ไม่หมดอายุ"}
+                        </td>
+                        <td className="p-4">
+                          <span className={cn(
+                            "px-2 py-1 rounded-full text-xs font-bold",
+                            c.is_active ? "bg-green-50 text-green-600" : "bg-gray-100 text-gray-500"
+                          )}>
+                            {c.is_active ? "เปิดใช้งาน" : "ปิดใช้งาน"}
+                          </span>
+                        </td>
+                        <td className="p-4 text-right space-x-2 whitespace-nowrap">
+                          <button
+                            onClick={() => handleToggleCoupon(c.id, c.is_active)}
+                            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                          >
+                            {c.is_active ? "ปิด" : "เปิด"}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCoupon(c.id)}
+                            className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 transition-colors inline-flex"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
         </div>
       )}
     </div>

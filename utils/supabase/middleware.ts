@@ -37,7 +37,7 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname
 
-  const isPublicPath = path === '/login' || path === '/register' || path === '/' || path === '/forgot-password' || path.startsWith('/auth')
+  const isPublicPath = path === '/login' || path === '/register' || path === '/' || path === '/forgot-password' || path === '/terms' || path.startsWith('/auth')
   
   // If user is not logged in and tries to access protected route
   if (!user && !isPublicPath) {

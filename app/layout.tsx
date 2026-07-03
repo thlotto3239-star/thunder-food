@@ -29,9 +29,15 @@ export const metadata: Metadata = {
   title: 'Thunder Delivery - สั่งอาหารออนไลน์',
   description: 'บริการส่งอาหารที่รวดเร็วที่สุด สั่งอาหารจากร้านดังใกล้บ้านคุณ พร้อมโปรโมชั่นสุดพิเศษ',
   generator: 'v0.app',
+  manifest: '/manifest.json',
   icons: {
     icon: '/icon.svg',
-    apple: '/icon.svg',
+    apple: '/apple-icon.png',
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Thunder Food',
   },
 }
 
@@ -43,6 +49,7 @@ export const viewport: Viewport = {
 }
 
 import { GlobalRealtimeListener } from "@/components/thunder/global-realtime-listener"
+import { PwaRegister } from "@/components/thunder/pwa-register"
 
 export default function RootLayout({
   children,
@@ -59,6 +66,7 @@ export default function RootLayout({
           <NotificationProvider>
             {children}
             <GlobalRealtimeListener />
+            <PwaRegister />
             <Toaster />
             <Analytics />
           </NotificationProvider>
